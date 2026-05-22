@@ -407,7 +407,7 @@ export function Body({
               );
             })}
           </div>
-          <div className={`py-2 flex-1 min-h-0 ${['Skills', 'Job Experience', 'Education Background'].includes(activeTab) ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>
+          <div className={`pt-2 pb-6 flex-1 min-h-[460px] ${['Skills', 'Job Experience', 'Education Background'].includes(activeTab) ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>
             {tabContent[activeTab]}
           </div>
         </section>
