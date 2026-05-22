@@ -180,21 +180,29 @@ export function Body({
             )}
         </div>
     ),
-    'Certifications': <FormattedText text={data['Certifications'] || 'No certifications listed.'} />,
+    'Certifications': (
+      <div className="prose prose-blue max-w-none prose-sm bg-blue-50/10 p-5 rounded-xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20 mt-2 text-slate-600">
+        <FormattedText text={data['Certifications'] || 'No certifications listed.'} />
+      </div>
+    ),
     'Achievements': (
-      <div className="text-slate-600 text-sm leading-relaxed">
+      <div className="prose prose-blue max-w-none prose-sm bg-blue-50/10 p-5 rounded-xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20 mt-2 text-slate-600">
         {data['Achievements'] && <FormattedText text={data['Achievements']} />}
         {data['Success Stories'] && (
-          <div className="mt-2">
+          <div className="mt-3">
             <FormattedText text={data['Success Stories']} />
           </div>
         )}
-        {!data['Achievements'] && !data['Success Stories'] && <p>No achievements listed.</p>}
+        {!data['Achievements'] && !data['Success Stories'] && <p className="italic text-gray-400">No achievements listed.</p>}
       </div>
     ),
-    'Interests': <FormattedText text={data['Interests'] || 'No interests listed.'} />,
+    'Interests': (
+      <div className="prose prose-blue max-w-none prose-sm bg-blue-50/10 p-5 rounded-xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20 mt-2 text-slate-600">
+        <FormattedText text={data['Interests'] || 'No interests listed.'} />
+      </div>
+    ),
     'Contact': (
-      <div className="p-4 sm:p-6 bg-slate-50 border border-slate-100 rounded-xl mt-2 flex flex-col gap-6 relative">
+      <div className="p-5 bg-blue-50/10 border border-blue-50/50 rounded-xl mt-2 flex flex-col gap-5 relative">
         {isEditingContact ? (
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center border-b border-slate-200 pb-2">

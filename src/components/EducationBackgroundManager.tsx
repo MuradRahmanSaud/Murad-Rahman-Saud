@@ -151,7 +151,7 @@ const SortableEduItem: React.FC<SortableEduItemProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group/item relative w-full flex items-center min-h-[2.5rem] py-1.5 cursor-pointer transition-all pr-4 rounded-r-full ${
+      className={`group/item relative w-full flex items-center min-h-[2.1rem] py-1 cursor-pointer transition-all pr-4 rounded-r-full ${
         activeEduId === edu.id 
           ? 'bg-[#d3e3fd] text-[#041e49] font-bold' 
           : 'text-[#444746] hover:bg-[#e9eaeb]'
@@ -166,9 +166,9 @@ const SortableEduItem: React.FC<SortableEduItemProps> = ({
         <div 
           {...attributes} 
           {...listeners} 
-          className="drag-handle p-1 cursor-grab active:cursor-grabbing hover:bg-gray-200/50 rounded flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity shrink-0"
+          className="drag-handle p-0.5 cursor-grab active:cursor-grabbing hover:bg-gray-200/50 rounded flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity shrink-0"
         >
-          <GripVertical size={14} className="text-gray-400" />
+          <GripVertical size={13} className="text-gray-400" />
         </div>
         
         {isEditing ? (
@@ -214,13 +214,13 @@ const SortableEduItem: React.FC<SortableEduItemProps> = ({
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-3 w-full min-w-0 pl-1">
-            <span className="shrink-0">
+          <div className="flex items-center gap-2 w-full min-w-0 pl-1">
+            <span className="shrink-0 scale-90">
               {getCategoryIcon(index)}
             </span>
             <div className="flex flex-col min-w-0 flex-1">
-              <span className="truncate text-[14px] leading-tight pr-2">{edu.degree}</span>
-              <div className="truncate text-[11px] opacity-70 font-normal">
+              <span className="truncate text-[13px] leading-tight pr-2">{edu.degree}</span>
+              <div className="truncate text-[10px] opacity-70 font-normal">
                 {(edu.fromDate || edu.toDate) && (
                   <>{formatDate(edu.fromDate)} - {getToDateDisplay(edu.toDate)}</>
                 )}
@@ -526,34 +526,34 @@ export function EducationBackgroundManager({ initialData, onSave }: EducationBac
             </div>
           ) : activeEdu ? (
             <div className="flex flex-col h-full min-h-0 group">
-              <div className="flex-1 overflow-y-auto px-8 py-10">
-                <div className="mb-10 text-center flex flex-col items-center">
-                  <h1 className="text-[clamp(1.2rem,2.5vw,2rem)] font-black text-[#041e49] mb-2 uppercase tracking-tight">{activeEdu.degree}</h1>
-                  <div className="flex items-center gap-3 text-blue-600 font-bold text-sm md:text-base">
+              <div className="flex-1 overflow-y-auto px-5 py-6">
+                <div className="mb-5 text-center flex flex-col items-center">
+                  <h1 className="text-[clamp(1.1rem,1.75vw,1.45rem)] font-bold text-[#041e49] mb-1.5 uppercase tracking-tight">{activeEdu.degree}</h1>
+                  <div className="flex items-center gap-2.5 text-blue-600 font-bold text-xs md:text-sm">
                     <span className="uppercase tracking-widest">{activeEdu.institution}</span>
                     {(activeEdu.fromDate || activeEdu.toDate) && (
                       <>
                         <span className="text-gray-300">•</span>
                         <span className="text-gray-500 font-medium">
                           {formatDate(activeEdu.fromDate)} - {getToDateDisplay(activeEdu.toDate)}
-                          {activeEdu.result && <span className="text-gray-400 font-medium italic ml-1.5">({activeEdu.result})</span>}
+                          {activeEdu.result && <span className="text-gray-400 font-medium italic ml-1">({activeEdu.result})</span>}
                         </span>
                       </>
                     )}
                   </div>
-                  <div className="mt-6 flex items-center gap-4">
-                    <div className="h-[1px] w-[clamp(1.5rem,5vw,6rem)] bg-gray-200 rounded-full" />
-                    <div className="flex gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-[#26c6da]" />
-                      <div className="w-2 h-2 rounded-full bg-[#5c6bc0]" />
-                      <div className="w-2 h-2 rounded-full bg-[#7e57c2]" />
-                      <div className="w-2 h-2 rounded-full bg-[#ab47bc]" />
+                  <div className="mt-4 flex items-center gap-3">
+                    <div className="h-[1px] w-12 bg-gray-200 rounded-full" />
+                    <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#26c6da]" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#5c6bc0]" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#7e57c2]" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#ab47bc]" />
                     </div>
-                    <div className="h-[1px] w-[clamp(1.5rem,5vw,6rem)] bg-gray-200 rounded-full" />
+                    <div className="h-[1px] w-12 bg-gray-200 rounded-full" />
                   </div>
                 </div>
                 
-                <div className="prose prose-blue max-w-none prose-sm md:prose-base bg-blue-50/10 p-8 rounded-3xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20">
+                <div className="prose prose-blue max-w-none prose-sm bg-blue-50/10 p-5 rounded-xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20">
                    <div dangerouslySetInnerHTML={{ __html: activeEdu.description || '<p class="italic text-gray-400">No details provided for this education entry.</p>' }} />
                 </div>
               </div>

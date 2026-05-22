@@ -336,7 +336,7 @@ export function Sidebar({
         
         {/* EXPERIENCE DISLPAY IN SIDEBAR */}
         {jobEntries.length > 0 && (
-          <div className="flex flex-col gap-1 text-white relative mt-6">
+          <div className="flex flex-col gap-1 text-white relative mt-12">
             <div className="flex items-center justify-between border-b border-white/10 pb-1">
               <div className="flex items-baseline gap-1.5 min-w-0">
                 <div className="flex items-center gap-1.5">

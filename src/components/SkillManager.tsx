@@ -111,7 +111,7 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group/item relative w-full flex items-center min-h-[2.5rem] py-1.5 cursor-pointer transition-all pr-4 rounded-r-full ${
+      className={`group/item relative w-full flex items-center min-h-[2.1rem] py-1 cursor-pointer transition-all pr-4 rounded-r-full ${
         activeSkillType === skill.type 
           ? 'bg-[#d3e3fd] text-[#041e49] font-bold' 
           : 'text-[#444746] hover:bg-[#e9eaeb]'
@@ -126,9 +126,9 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({
         <div 
           {...attributes} 
           {...listeners} 
-          className="drag-handle p-1 cursor-grab active:cursor-grabbing hover:bg-gray-200/50 rounded flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity shrink-0"
+          className="drag-handle p-0.5 cursor-grab active:cursor-grabbing hover:bg-gray-200/50 rounded flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity shrink-0"
         >
-          <GripVertical size={14} className="text-gray-400" />
+          <GripVertical size={13} className="text-gray-400" />
         </div>
         
         {editingSkill?.type === skill.type ? (
@@ -153,12 +153,12 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({
              </div>
            </div>
         ) : (
-           <div className="flex items-center gap-3 w-full min-w-0 pl-1">
-             <span className="shrink-0">
+           <div className="flex items-center gap-2 w-full min-w-0 pl-1">
+             <span className="shrink-0 scale-90">
                {getCategoryIcon(index)}
              </span>
              <div className="flex flex-col min-w-0 flex-1">
-               <span className="truncate text-[14px] leading-tight pr-2">{skill.type}</span>
+               <span className="truncate text-[13px] leading-tight pr-2">{skill.type}</span>
                {skill.rating && skill.rating > 0 ? (
                  <div className="flex gap-0.5 mt-0.5">
                    {[...Array(5)].map((_, i) => (
@@ -680,38 +680,38 @@ export function SkillManager({ initialSkillsText, onSave }: SkillManagerProps) {
             </div>
           ) : (
             <div className="flex flex-col h-full min-h-0 group" id="skill-content-container">
-              <div className="flex-1 overflow-y-auto px-4 prose prose-sm max-w-none prose-slate prose-img:rounded-xl prose-img:mx-auto prose-img:max-h-[350px] prose-img:object-contain pb-10" id="skill-content-body">
+              <div className="flex-1 overflow-y-auto px-5 py-6 prose prose-sm max-w-none prose-slate prose-img:rounded-xl prose-img:mx-auto prose-img:max-h-[350px] prose-img:object-contain pb-10" id="skill-content-body">
                 {activeSkillType && (hasCleanDescription(activeSkill?.description) || (activeSkill?.applications && activeSkill.applications.length > 0)) && (
-                  <div className="flex flex-col items-center text-center mt-4 mb-8 not-prose">
-                    <h2 className="text-[clamp(0.9rem,1.8vw,1.4rem)] font-black text-gray-800 tracking-[0.2em] mb-3 uppercase leading-tight">{activeSkillType}</h2>
-                    <div className="flex items-center gap-4">
-                      <div className="h-[1px] w-[clamp(1.5rem,5vw,6rem)] bg-gray-200 rounded-full" />
-                      <div className="flex gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-[#26c6da]" />
-                        <div className="w-2 h-2 rounded-full bg-[#5c6bc0]" />
-                        <div className="w-2 h-2 rounded-full bg-[#7e57c2]" />
-                        <div className="w-2 h-2 rounded-full bg-[#ab47bc]" />
+                  <div className="flex flex-col items-center text-center mt-2 mb-5 not-prose">
+                    <h2 className="text-[clamp(1.1rem,1.75vw,1.45rem)] font-bold text-[#041e49] mb-1.5 uppercase tracking-tight">{activeSkillType}</h2>
+                    <div className="flex items-center gap-3 mt-1">
+                      <div className="h-[1px] w-12 bg-gray-200 rounded-full" />
+                      <div className="flex gap-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#26c6da]" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#5c6bc0]" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#7e57c2]" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#ab47bc]" />
                       </div>
-                      <div className="h-[1px] w-[clamp(1.5rem,5vw,6rem)] bg-gray-200 rounded-full" />
+                      <div className="h-[1px] w-12 bg-gray-200 rounded-full" />
                     </div>
                   </div>
                 )}
                 
                 {hasCleanDescription(activeSkill?.description) && (
-                  <div className="skill-content-html text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: activeSkill.description }} />
+                  <div className="skill-content-html prose prose-blue max-w-none prose-sm bg-blue-50/10 p-5 rounded-xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20 text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: activeSkill.description }} />
                 )}
 
                   {activeSkill?.applications && activeSkill.applications.length > 0 && (
                     <div className="mt-0">
-                     <div className="grid gap-x-4 gap-y-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 w-full max-w-none not-prose mt-2 pb-10 px-4">
+                     <div className="grid gap-x-4 gap-y-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 w-full max-w-none not-prose mt-2 pb-6 px-0">
                        {activeSkill.applications.map((app, idx) => {
                           const color = INFOGRAPHIC_COLORS[idx % INFOGRAPHIC_COLORS.length];
                           return (
                             <div key={app.id} className="relative group flex items-center transition-all hover:scale-[1.01]">
                                {/* Circle Icon Part */}
                                <div className="shrink-0 relative z-20">
-                                 <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white shadow-md flex items-center justify-center p-1 border border-gray-50/50">
-                                    <div className="w-full h-full rounded-full flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 border-2" style={{ borderColor: color.main }}>
+                                 <div className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-white shadow-sm flex items-center justify-center p-0.5 border border-gray-50/50">
+                                    <div className="w-full h-full rounded-full flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 border" style={{ borderColor: color.main }}>
                                        {app.image ? (
                                           <img 
                                              src={getDirectImageUrl(app.image)} 
@@ -720,19 +720,19 @@ export function SkillManager({ initialSkillsText, onSave }: SkillManagerProps) {
                                              alt={app.name} 
                                           />
                                        ) : (
-                                          <Layers className="w-6 h-6 md:w-7 md:h-7" style={{ color: color.main }} />
+                                          <Layers className="w-4 h-4" style={{ color: color.main }} />
                                        )}
                                     </div>
                                  </div>
                                  {/* Arrow Triangle */}
-                                 <div className="absolute top-1/2 -right-0.5 -translate-y-1/2 w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent border-l-[5px] z-30" style={{ borderLeftColor: color.main }}></div>
+                                 <div className="absolute top-1/2 -right-0.5 -translate-y-1/2 w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[4px] z-30" style={{ borderLeftColor: color.main }}></div>
                                </div>
 
                                {/* Description Pill Part */}
-                               <div className="flex-1 -ml-4 md:-ml-5 bg-white border border-gray-100 rounded-r-full shadow-sm py-2 pl-7 md:pl-9 pr-4 min-h-[3.5rem] md:min-h-[4rem] flex flex-col justify-center">
-                                  <h4 className="font-black text-[0.625rem] md:text-[0.75rem] text-[#004a6c] mb-0 uppercase tracking-tight line-clamp-1">{app.name}</h4>
+                               <div className="flex-1 -ml-3 bg-white border border-gray-100 rounded-r-xl shadow-sm py-1 pl-4 pr-3 min-h-[2.5rem] md:min-h-[2.75rem] flex flex-col justify-center">
+                                  <h4 className="font-bold text-[0.625rem] md:text-[0.6875rem] text-[#004a6c] mb-0 uppercase tracking-tight line-clamp-1">{app.name}</h4>
                                   {app.description && (
-                                     <p className="text-[0.5rem] md:text-[0.625rem] text-gray-400 leading-tight line-clamp-2 italic">
+                                     <p className="text-[0.5rem] md:text-[0.5625rem] text-gray-400 leading-tight line-clamp-2 italic">
                                         {app.description}
                                      </p>
                                   )}
