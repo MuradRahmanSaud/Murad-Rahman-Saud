@@ -1,0 +1,6 @@
+{
+  "name": "Dynamic Personal Portfolio",
+  "description": "A compact, single-page dynamic personal portfolio that fetches content directly from a Google Sheet, featuring smooth animations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
