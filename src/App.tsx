@@ -424,6 +424,8 @@ export default function App() {
           title={title}
           summary={summary}
           currentExperience={data['Job Experiance'] || data['Job Experience'] || ''}
+          onUpdateField={handleUpdateData}
+          fullName={data['Name'] || ''}
           isEditingName={isEditingName}
           setIsEditingName={setIsEditingName}
           editedName={editedName}
