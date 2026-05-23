@@ -702,26 +702,40 @@ export function SkillManager({ initialSkillsText, onSave }: SkillManagerProps) {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col h-full min-h-0 group" id="skill-content-container">
-              <div className="flex-1 overflow-y-auto px-5 py-6 prose prose-sm max-w-none prose-slate prose-img:rounded-xl prose-img:mx-auto prose-img:max-h-[350px] prose-img:object-contain pb-10" id="skill-content-body">
-                {activeSkillType && (hasCleanDescription(activeSkill?.description) || (activeSkill?.applications && activeSkill.applications.length > 0)) && (
-                  <div className="flex flex-col items-center text-center mt-2 mb-5 not-prose">
-                    <h2 className="text-[clamp(1.1rem,1.75vw,1.45rem)] font-bold text-[#041e49] mb-1.5 uppercase tracking-tight">{activeSkillType}</h2>
-                    <div className="flex items-center gap-3 mt-1">
-                      <div className="h-[1px] w-12 bg-gray-200 rounded-full" />
-                      <div className="flex gap-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#26c6da]" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#5c6bc0]" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#7e57c2]" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#ab47bc]" />
+            <div className="flex flex-col h-full min-h-0 group relative" id="skill-content-container">
+              {activeSkillType && (
+                /* Compact Header for Skill metadata, matching Job Experience Header style */
+                <div className="shrink-0 border-b border-gray-100 bg-gray-50/10 px-6 py-3.5">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
+                    <div className="min-w-0 flex-1">
+                      <h1 className="text-xs md:text-sm font-bold text-[#041e49] tracking-wider truncate">
+                        {activeSkillType}
+                      </h1>
+                      <div className="flex items-center gap-1 text-blue-600 font-bold text-[10px] md:text-xs tracking-wider truncate mt-0.5">
+                        <span className="text-gray-400 font-medium text-[9px] uppercase tracking-wider mr-1">Skill Rating:</span>
+                        {activeSkill?.rating && activeSkill.rating > 0 ? (
+                          <div className="flex gap-0.5 items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} size={10} className={i < activeSkill.rating! ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 font-medium italic text-[9px] lowercase">unrated</span>
+                        )}
                       </div>
-                      <div className="h-[1px] w-12 bg-gray-200 rounded-full" />
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 text-[10px] md:text-xs font-medium text-gray-400 whitespace-nowrap md:text-right shrink-0 mt-0.5 md:mt-0">
+                      <span className="text-[#041e49] font-bold bg-[#d3e3fd]/40 px-2 py-0.5 rounded-md border border-blue-100/30 text-[9px] uppercase tracking-wider">
+                        Professional Skill Group
+                      </span>
                     </div>
                   </div>
-                )}
-                
+                </div>
+              )}
+              
+              <div className="flex-1 overflow-y-auto px-6 pt-3 pb-10 prose prose-sm max-w-none prose-slate prose-img:rounded-xl prose-img:mx-auto prose-img:max-h-[350px] prose-img:object-contain [&_>div>*:first-child]:mt-0 [&_h1]:mt-3 [&_h1]:mb-1 [&_h2]:mt-2.5 [&_h2]:mb-1 [&_h3]:mt-2 [&_h3]:mb-0.5 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5" id="skill-content-body">
                 {hasCleanDescription(activeSkill?.description) && (
-                  <div className="skill-content-html prose prose-blue max-w-none prose-sm text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: activeSkill.description }} />
+                  <div className="skill-content-html prose prose-blue max-w-none prose-sm text-slate-600 mb-6" dangerouslySetInnerHTML={{ __html: activeSkill.description }} />
                 )}
 
                   {activeSkill?.applications && activeSkill.applications.length > 0 && (
