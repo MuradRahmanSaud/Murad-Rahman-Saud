@@ -27,15 +27,27 @@ const INFOGRAPHIC_COLORS = [
   { main: '#ab47bc', dark: '#8e24aa', light: '#fce4ec' }, // Magenta
 ];
 
-const formatDate = (dateStr: string) => {
+export const getYearOnly = (dateStr: string): string => {
   if (!dateStr) return '';
-  try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  } catch (e) {
-    return dateStr;
+  const trimmed = dateStr.trim();
+  if (trimmed.toLowerCase() === 'present') {
+    return 'Present';
   }
+  try {
+    const d = new Date(trimmed);
+    if (!isNaN(d.getTime())) {
+      return d.getFullYear().toString();
+    }
+    const match = trimmed.match(/\b(19\d\d|20\d\d)\b/);
+    if (match) return match[1];
+    return trimmed;
+  } catch (e) {
+    return trimmed;
+  }
+};
+
+const formatDate = (dateStr: string) => {
+  return getYearOnly(dateStr);
 };
 
 const getToDateDisplay = (toDate: string | null | undefined): string => {
@@ -67,8 +79,8 @@ export function parseEducation(text: string): EducationEntry[] {
           degree: lines[0] || '',
           result: lines[1] || '',
           institution: lines[2] || '',
-          fromDate: lines[3] || '',
-          toDate: lines[4] || '',
+          fromDate: lines[3] ? getYearOnly(lines[3]) : '',
+          toDate: lines[4] ? getYearOnly(lines[4]) : '',
           description: lines.slice(5).join('\n') || ''
         };
       });
@@ -86,8 +98,8 @@ export function parseEducation(text: string): EducationEntry[] {
         const result = match ? match[2].trim() : '';
         
         const [start, end] = durationLine.split(' - ').map(s => s.trim());
-        const fromDate = start || '';
-        const toDate = end === 'Present' ? '' : end || '';
+        const fromDate = start ? getYearOnly(start) : '';
+        const toDate = end === 'Present' ? 'Present' : (end ? getYearOnly(end) : '');
         
         return {
           id: `edu-${i}-${Date.now()}-${Math.random()}`,
@@ -196,7 +208,9 @@ const SortableEduItem: React.FC<SortableEduItemProps> = ({
               <div className="flex-1 flex flex-col gap-0.5">
                 <label className="text-[9px] uppercase font-bold text-gray-400 pl-1">From</label>
                 <input
-                  type="date"
+                  type="text"
+                  placeholder="YYYY"
+                  maxLength={4}
                   value={tempData.fromDate}
                   onChange={e => setTempData({...tempData, fromDate: e.target.value})}
                   className="w-full bg-transparent outline-none text-[#041e49]/70 border-b border-[#041e49]/20 py-0.5 text-[10px]"
@@ -205,7 +219,9 @@ const SortableEduItem: React.FC<SortableEduItemProps> = ({
               <div className="flex-1 flex flex-col gap-0.5">
                 <label className="text-[9px] uppercase font-bold text-gray-400 pl-1">To</label>
                 <input
-                   type="date"
+                  type="text"
+                  placeholder="YYYY or Present"
+                  maxLength={10}
                   value={tempData.toDate}
                   onChange={e => setTempData({...tempData, toDate: e.target.value})}
                   className="w-full bg-transparent outline-none text-[#041e49]/70 border-b border-[#041e49]/20 py-0.5 text-[10px]"
@@ -241,6 +257,8 @@ export function EducationBackgroundManager({ initialData, onSave }: EducationBac
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [editingEduId, setEditingEduId] = useState<string | null>(null);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [eduToDeleteId, setEduToDeleteId] = useState<string | null>(null);
   
   // Temporary form state
   const [tempData, setTempData] = useState<Partial<EducationEntry>>({
@@ -395,7 +413,11 @@ export function EducationBackgroundManager({ initialData, onSave }: EducationBac
                       <Edit2 size={14} />
                     </button>
                     <button 
-                      onClick={(e) => handleDelete(activeEduId, e)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEduToDeleteId(activeEduId);
+                        setShowDeleteConfirm(true);
+                      }}
                       className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-500 hover:text-red-600"
                       title="Delete Entry"
                     >
@@ -434,7 +456,9 @@ export function EducationBackgroundManager({ initialData, onSave }: EducationBac
                     <div className="flex-1 flex flex-col gap-0.5">
                       <label className="text-[9px] uppercase font-bold text-gray-400 pl-1">From</label>
                       <input
-                        type="date"
+                        type="text"
+                        placeholder="YYYY"
+                        maxLength={4}
                         value={tempData.fromDate}
                         onChange={e => setTempData({...tempData, fromDate: e.target.value})}
                         className="w-full bg-transparent outline-none text-[#041e49]/70 border-b border-[#041e49]/20 py-0.5 text-[10px]"
@@ -443,7 +467,9 @@ export function EducationBackgroundManager({ initialData, onSave }: EducationBac
                     <div className="flex-1 flex flex-col gap-0.5">
                       <label className="text-[9px] uppercase font-bold text-gray-400 pl-1">To</label>
                       <input
-                        type="date"
+                        type="text"
+                        placeholder="YYYY or Present"
+                        maxLength={10}
                         value={tempData.toDate}
                         onChange={e => setTempData({...tempData, toDate: e.target.value})}
                         className="w-full bg-transparent outline-none text-[#041e49]/70 border-b border-[#041e49]/20 py-0.5 text-[10px]"
@@ -555,10 +581,10 @@ export function EducationBackgroundManager({ initialData, onSave }: EducationBac
               <div className="shrink-0 border-b border-gray-100 bg-gray-50/10 px-6 py-3.5">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
                   <div className="min-w-0">
-                    <h1 className="text-xs md:text-sm font-bold text-[#041e49] uppercase tracking-wider truncate">
+                    <h1 className="text-xs md:text-sm font-bold text-[#041e49] tracking-wider truncate">
                       {activeEdu.degree}
                     </h1>
-                    <div className="text-[10px] md:text-xs text-blue-600 font-bold uppercase tracking-wider truncate mt-0.5">
+                    <div className="text-[10px] md:text-xs text-blue-600 font-bold tracking-wider truncate mt-0.5">
                       {activeEdu.institution}
                     </div>
                   </div>
@@ -605,6 +631,51 @@ export function EducationBackgroundManager({ initialData, onSave }: EducationBac
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="absolute inset-0 bg-[#041e49]/30 backdrop-blur-[2px] z-[120] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-xl border border-gray-100 max-w-sm w-full p-5 transform transition-all animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 text-red-600 mb-3 animate-none">
+              <div className="p-2 bg-red-50 rounded-full">
+                <Trash2 size={20} />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900">Delete Educational History</h3>
+            </div>
+            <p className="text-xs text-gray-500 mb-5 leading-relaxed">
+              Are you sure you want to delete the educational history for{' '}
+              <strong className="text-gray-800">
+                {educations.find((e) => e.id === (eduToDeleteId || activeEduId))?.degree || 'this entry'}
+              </strong>
+              ? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setEduToDeleteId(null);
+                }}
+                className="px-3.5 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={(e) => {
+                  const targetId = eduToDeleteId || activeEduId;
+                  if (targetId) {
+                    handleDelete(targetId, e);
+                  }
+                  setShowDeleteConfirm(false);
+                  setEduToDeleteId(null);
+                }}
+                className="px-3.5 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded shadow-sm transition-all"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

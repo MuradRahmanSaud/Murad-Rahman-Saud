@@ -205,6 +205,8 @@ export function JobExperienceManager({ initialData, onSave }: JobExperienceManag
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [editingJobId, setEditingJobId] = useState<string | null>(null);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [jobToDeleteId, setJobToDeleteId] = useState<string | null>(null);
   
   // Temporary form state
   const [tempData, setTempData] = useState<Partial<JobEntry>>({
@@ -387,7 +389,11 @@ export function JobExperienceManager({ initialData, onSave }: JobExperienceManag
                       <Edit2 size={14} />
                     </button>
                     <button 
-                      onClick={(e) => handleDelete(activeJobId, e)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setJobToDeleteId(activeJobId);
+                        setShowDeleteConfirm(true);
+                      }}
                       className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-500 hover:text-red-600"
                       title="Delete Entry"
                     >
@@ -545,35 +551,36 @@ export function JobExperienceManager({ initialData, onSave }: JobExperienceManag
               </div>
             </div>
           ) : activeJob ? (
-            <div className="flex flex-col h-full min-h-0 group">
-              <div className="flex-1 overflow-y-auto px-5 py-6">
-                <div className="mb-5 text-center flex flex-col items-center">
-                  <h1 className="text-[clamp(1.1rem,1.75vw,1.45rem)] font-bold text-[#041e49] mb-1.5 uppercase tracking-tight">{activeJob.title}</h1>
-                  <div className="flex items-center gap-2.5 text-blue-600 font-bold text-xs md:text-sm">
-                    <span className="uppercase tracking-widest">{activeJob.organization}</span>
+            <div className="flex flex-col h-full min-h-0 group relative">
+              {/* Compact Header for Job metadata */}
+              <div className="shrink-0 border-b border-gray-100 bg-gray-50/10 px-6 py-3.5">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
+                  <div className="min-w-0">
+                    <h1 className="text-xs md:text-sm font-bold text-[#041e49] tracking-wider truncate">
+                      {activeJob.title}
+                    </h1>
+                    <div className="text-[10px] md:text-xs text-blue-600 font-bold tracking-wider truncate mt-0.5">
+                      {activeJob.organization}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-[10px] md:text-xs font-medium text-gray-400 whitespace-nowrap md:text-right shrink-0 mt-0.5 md:mt-0">
                     {(activeJob.fromDate || activeJob.toDate) && (
-                      <>
-                        <span className="text-gray-300">•</span>
-                        <span className="text-gray-500 font-medium">
-                          {formatDate(activeJob.fromDate)} - {getToDateDisplay(activeJob.toDate)}
-                          {activeJob.employmentType && <span className="text-gray-400 font-medium italic ml-1">({activeJob.employmentType})</span>}
-                        </span>
-                      </>
+                      <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-semibold text-[9px] uppercase tracking-wider">
+                        {formatDate(activeJob.fromDate)} - {getToDateDisplay(activeJob.toDate)}
+                      </span>
+                    )}
+                    {activeJob.employmentType && (
+                      <span className="text-[#041e49] font-bold bg-[#d3e3fd]/40 px-2 py-0.5 rounded-md border border-blue-100/30 text-[9px] uppercase tracking-wider">
+                        {activeJob.employmentType}
+                      </span>
                     )}
                   </div>
-                  <div className="mt-4 flex items-center gap-3">
-                    <div className="h-[1px] w-12 bg-gray-200 rounded-full" />
-                    <div className="flex gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#26c6da]" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#5c6bc0]" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#7e57c2]" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#ab47bc]" />
-                    </div>
-                    <div className="h-[1px] w-12 bg-gray-200 rounded-full" />
-                  </div>
                 </div>
-                
-                <div className="prose prose-blue max-w-none prose-sm text-slate-600">
+              </div>
+
+              {/* Scrollable Description Container */}
+              <div className="flex-1 overflow-y-auto px-6 pt-1.5 pb-6 min-h-0">
+                <div className="prose prose-blue max-w-none prose-sm text-slate-600 [&_>div>*:first-child]:mt-0 [&_h1]:mt-3 [&_h1]:mb-1 [&_h2]:mt-2.5 [&_h2]:mb-1 [&_h3]:mt-2 [&_h3]:mb-0.5 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5">
                    <div dangerouslySetInnerHTML={{ __html: activeJob.description || '<p class="italic text-gray-400">No details provided for this role.</p>' }} />
                 </div>
               </div>
@@ -583,7 +590,7 @@ export function JobExperienceManager({ initialData, onSave }: JobExperienceManag
                   onClick={() => { setTempData(activeJob); setIsEditingContent(true); }}
                   className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm"
                 >
-                  <Edit2 size={12} /> Edit Description
+                  <Edit2 size={12} /> Edit Details
                 </button>
               </div>
             </div>
@@ -598,6 +605,51 @@ export function JobExperienceManager({ initialData, onSave }: JobExperienceManag
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="absolute inset-0 bg-[#041e49]/30 backdrop-blur-[2px] z-[120] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-xl border border-gray-100 max-w-sm w-full p-5 transform transition-all animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 text-red-600 mb-3 animate-none">
+              <div className="p-2 bg-red-50 rounded-full">
+                <Trash2 size={20} />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900">Delete Job Experience</h3>
+            </div>
+            <p className="text-xs text-gray-500 mb-5 leading-relaxed">
+              Are you sure you want to delete the job experience entry for{' '}
+              <strong className="text-gray-800">
+                {jobs.find((j) => j.id === (jobToDeleteId || activeJobId))?.title || 'this entry'}
+              </strong>
+              ? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setJobToDeleteId(null);
+                }}
+                className="px-3.5 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={(e) => {
+                  const targetId = jobToDeleteId || activeJobId;
+                  if (targetId) {
+                    handleDelete(targetId, e);
+                  }
+                  setShowDeleteConfirm(false);
+                  setJobToDeleteId(null);
+                }}
+                className="px-3.5 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded shadow-sm transition-all"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

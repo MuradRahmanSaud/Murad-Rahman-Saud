@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Phone, Mail, Link as LinkIcon, MapPin, Edit2, ImagePlus, Check, X, Loader2, RefreshCw, Briefcase, GraduationCap, Contact as ContactIcon, Star } from 'lucide-react';
 import { FormattedText } from './FormattedText';
 import { ExperienceTimeline } from './ExperienceTimeline';
-import { parseEducation } from './EducationBackgroundManager';
+import { parseEducation, getYearOnly } from './EducationBackgroundManager';
 import type { PortfolioData } from '../lib/sheet';
 import { updateSheetValue } from '../lib/sheet';
 import { calculateTotalExperience } from '../lib/experience';
@@ -444,8 +444,15 @@ export function Sidebar({
             
             <div className="relative pl-6 space-y-4 mt-4">
               {eduEntries.map((edu, idx) => {
+                const getEduToDateDisplay = (toDate: string | null | undefined): string => {
+                  if (!toDate || !toDate.trim() || toDate.trim().toLowerCase() === 'present') {
+                    return 'Present';
+                  }
+                  return getYearOnly(toDate.trim());
+                };
+
                 const dateDisplay = (edu.fromDate || edu.toDate) ? (
-                  `${formatDate(edu.fromDate)} - ${getToDateDisplay(edu.toDate)}`
+                  `${getYearOnly(edu.fromDate)} - ${getEduToDateDisplay(edu.toDate)}`
                 ) : '';
 
                 return (
