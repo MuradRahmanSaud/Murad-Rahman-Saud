@@ -1,10 +1,11 @@
 import React, { useState, useMemo, Suspense, lazy } from 'react';
-import { Edit2, Check, X, Loader2, Star, Award, Trophy, Heart, Circle, Briefcase, GraduationCap, Phone, Mail, MapPin, Link as LinkIcon, Contact } from 'lucide-react';
+import { Edit2, Check, X, Loader2, Star, Award, Trophy, Heart, Circle, Briefcase, GraduationCap, Phone, Mail, MapPin, Link as LinkIcon, Contact, Code } from 'lucide-react';
 
 const JoditEditor = lazy(() => import('jodit-react'));
 import { SkillManager } from './SkillManager';
 import { JobExperienceManager } from './JobExperienceManager';
 import { EducationBackgroundManager } from './EducationBackgroundManager';
+import { ProjectContributionManager } from './ProjectContributionManager';
 import { FormattedText } from './FormattedText';
 import { type PortfolioData, updateSheetValue } from '../lib/sheet';
 
@@ -52,6 +53,10 @@ interface BodyProps {
   // Education editing
   handleSaveEducation: (text: string) => void;
   isUpdatingEducation: boolean;
+
+  // Project Contribution editing
+  handleSaveProjectContribution: (text: string) => void;
+  isUpdatingProjectContribution: boolean;
 }
 
 export function Body({
@@ -85,10 +90,12 @@ export function Body({
   handleSaveExperience,
   isUpdatingExperience,
   handleSaveEducation,
-  isUpdatingEducation
+  isUpdatingEducation,
+  handleSaveProjectContribution,
+  isUpdatingProjectContribution
 }: BodyProps) {
   const [activeTab, setActiveTab] = useState('Job Experience');
-  const tabs = ['Job Experience', 'Education Background', 'Skills', 'Certifications', 'Achievements', 'Interests', 'Contact'];
+  const tabs = ['Job Experience', 'Education Background', 'Skills', 'Project Contributions', 'Certifications', 'Achievements', 'Interests', 'Contact'];
 
   const contactRaw = data['Contact'] || '';
   
@@ -181,6 +188,20 @@ export function Body({
             {isUpdatingSkills && (
               <div className="absolute top-0 right-0 p-2">
                 <Loader2 className="w-4 h-4 text-[#004a6c] animate-spin" />
+              </div>
+            )}
+          </div>
+        );
+      case 'Project Contributions':
+        return (
+          <div className="relative flex-1 flex flex-col min-h-0">
+            <ProjectContributionManager 
+              initialData={data['Project Contributions'] || data['Project Contribution'] || ''} 
+              onSave={handleSaveProjectContribution} 
+            />
+            {isUpdatingProjectContribution && (
+              <div className="absolute top-4 right-4 z-50">
+                <Loader2 className="w-5 h-5 text-[#004a6c] animate-spin" />
               </div>
             )}
           </div>
@@ -681,6 +702,7 @@ export function Body({
               if (tab === 'Job Experience') Icon = Briefcase;
               else if (tab === 'Education Background') Icon = GraduationCap;
               else if (tab === 'Skills') Icon = Star;
+              else if (tab === 'Project Contributions') Icon = Code;
               else if (tab === 'Certifications') Icon = Award;
               else if (tab === 'Achievements') Icon = Trophy;
               else if (tab === 'Interests') Icon = Heart;
@@ -702,7 +724,7 @@ export function Body({
               );
             })}
           </div>
-          <div className={`py-2 flex-1 min-h-0 ${['Skills', 'Job Experience', 'Education Background'].includes(activeTab) ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>
+          <div className={`py-2 flex-1 min-h-0 ${['Skills', 'Job Experience', 'Education Background', 'Project Contributions'].includes(activeTab) ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>
             {renderTabContent(activeTab)}
           </div>
         </section>

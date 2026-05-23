@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Phone, Mail, Link as LinkIcon, MapPin, Edit2, ImagePlus, Check, X, Loader2, RefreshCw, Briefcase, GraduationCap, Contact as ContactIcon, Star } from 'lucide-react';
+import { Phone, Mail, Link as LinkIcon, MapPin, Edit2, ImagePlus, Check, X, Loader2, RefreshCw, Briefcase, GraduationCap, Contact as ContactIcon, Star, Code } from 'lucide-react';
 import { FormattedText } from './FormattedText';
 import { ExperienceTimeline } from './ExperienceTimeline';
 import { parseEducation, getYearOnly } from './EducationBackgroundManager';
@@ -486,12 +486,88 @@ export function Sidebar({
           </div>
         )}
 
-        {/* SOFTWARE / TOOLS */}
-        {data['Tools & Technologies'] && (
-          <div className="flex flex-col gap-1">
-            <h2 className="text-[0.75rem] font-bold tracking-widest border-b border-white/10 pb-0.5 uppercase text-white">Software</h2>
-            <div className="text-[0.6875rem] text-gray-200 font-light leading-snug [&_ul]:list-none [&_ul]:p-0 [&_li]:mb-0.5">
-              <FormattedText text={data['Tools & Technologies']} />
+        {/* PROJECT CONTRIBUTIONS DISPLAY IN SIDEBAR */}
+        {(data['Project Contributions'] || data['Tools & Technologies']) && (
+          <div className="flex flex-col gap-1 text-white relative mt-6 animate-in fade-in duration-200">
+            <div className="flex items-center gap-1.5 border-b border-white/10 pb-1">
+              <Code className="w-3.5 h-3.5 text-[#26c6da]" />
+              <h2 className="text-[0.75rem] font-bold tracking-widest uppercase whitespace-nowrap">Projects</h2>
+            </div>
+            <div className="relative pl-6 space-y-3 mt-4">
+              {(() => {
+                try {
+                  const text = data['Project Contributions'] || data['Tools & Technologies'] || '';
+                  if (!text.trim()) return <p className="text-[10px] text-gray-400 italic">No projects listed.</p>;
+                  
+                  // Fallback for legacy text which is not formatted as structured Project Contribution entries (doesn't contain --- or has simple format)
+                  if (!text.includes('\n') || (!text.includes('\n\n') && !text.includes('---'))) {
+                    return (
+                      <div className="text-[0.6875rem] text-gray-200 font-light leading-snug">
+                        <FormattedText text={text} />
+                      </div>
+                    );
+                  }
+
+                  let parts = [];
+                  if (text.includes('\n\n---\n\n')) {
+                    parts = text.split('\n\n---\n\n').filter(p => p.trim());
+                  } else {
+                    parts = text.split('\n\n').filter(p => p.trim());
+                  }
+                  
+                  if (parts.length === 0 || parts[0].split('\n').length < 3) {
+                    // Let's safe-check to see if it's bullet lists or similar
+                    return (
+                      <div className="text-[0.6875rem] text-gray-200 font-light leading-snug">
+                        <FormattedText text={text} />
+                      </div>
+                    );
+                  }
+
+                  const projects = parts.map((p, i) => {
+                    const lines = p.split('\n');
+                    return {
+                      title: lines[0] || '',
+                      role: lines[1] || '',
+                      technologies: lines[2] || '',
+                    };
+                  });
+
+                  return projects.map((proj, idx) => (
+                    <div key={idx} className="relative group/proj text-left">
+                      {/* Timeline Dot */}
+                      <div className="absolute -left-[21px] top-1.5 w-[8px] h-[8px] rounded-full border-2 bg-slate-400 ring-2 border-[#004a6c] ring-white/10 group-hover/proj:bg-[#26c6da] transition-colors z-20"></div>
+                      
+                      {/* Connecting Line (except for last item) */}
+                      {idx < projects.length - 1 && (
+                        <div className="absolute -left-[18px] top-[14px] bottom-[-18px] w-[2px] bg-white/10 z-10 transition-colors group-hover/proj:bg-white/20"></div>
+                      )}
+
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-[12px] font-bold leading-tight text-white group-hover/proj:text-[#26c6da] transition-colors truncate block" title={proj.title}>
+                          {proj.title}
+                        </span>
+                        {proj.role && (
+                          <span className="text-[10px] text-gray-300 truncate block">
+                            {proj.role}
+                          </span>
+                        )}
+                        {proj.technologies && (
+                          <span className="text-[9px] text-[#26c6da]/80 uppercase font-semibold tracking-wider truncate block" title={proj.technologies}>
+                            {proj.technologies}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ));
+                } catch (e) {
+                  return (
+                    <div className="text-[0.6875rem] text-gray-200 font-light leading-snug">
+                      <FormattedText text={data['Project Contributions'] || data['Tools & Technologies'] || ''} />
+                    </div>
+                  );
+                }
+              })()}
             </div>
           </div>
         )}

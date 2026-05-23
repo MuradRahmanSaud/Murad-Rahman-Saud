@@ -33,6 +33,7 @@ export default function App() {
 
   const [isUpdatingExperience, setIsUpdatingExperience] = useState(false);
   const [isUpdatingEducation, setIsUpdatingEducation] = useState(false);
+  const [isUpdatingProjectContribution, setIsUpdatingProjectContribution] = useState(false);
 
   const handleUpdateData = (key: string, value: string) => {
     setData(prev => prev ? { ...prev, [key]: value } : prev);
@@ -125,6 +126,35 @@ export default function App() {
       console.error("Failed to update education", e);
       setIsUpdatingEducation(false);
       alert("Failed to update education background. Please try again.");
+    });
+  };
+
+  const handleSaveProjectContribution = (newData: string) => {
+    const originalName = data?.['Name'] || '';
+    
+    setIsUpdatingProjectContribution(true);
+    handleUpdateData('Project Contributions', newData);
+    
+    const url = "https://script.google.com/macros/s/AKfycbw9DedjbjOOGjLGjol4op1DWb_lUfGoDTgChSLrvSYUC41HcQaf6CzNLRqtILfTIqR5/exec";
+    const payload = {
+      action: "UPDATE",
+      gid: SHEET_GID,
+      spreadsheetId: SPREADSHEET_ID,
+      data: { 'Project Contributions': newData },
+      idKey: "Name",
+      idValue: originalName
+    };
+    
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: { "Content-Type": "text/plain" }
+    }).then(() => {
+        setIsUpdatingProjectContribution(false);
+    }).catch(e => {
+      console.error("Failed to update project contribution", e);
+      setIsUpdatingProjectContribution(false);
+      alert("Failed to update project contribution. Please try again.");
     });
   };
 
@@ -449,6 +479,8 @@ export default function App() {
           isUpdatingExperience={isUpdatingExperience}
           handleSaveEducation={handleSaveEducation}
           isUpdatingEducation={isUpdatingEducation}
+          handleSaveProjectContribution={handleSaveProjectContribution}
+          isUpdatingProjectContribution={isUpdatingProjectContribution}
         />
 
       </div>
