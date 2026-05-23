@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Plus, Edit2, Trash2, GripVertical, Briefcase, Award } from 'lucide-react';
-import JoditEditor from 'jodit-react';
+import React, { useState, useMemo, useRef, useEffect, Suspense, lazy } from 'react';
+import { Plus, Edit2, Trash2, GripVertical, Briefcase, Award, Loader2 } from 'lucide-react';
+const JoditEditor = lazy(() => import('jodit-react'));
 import {
   DndContext,
   closestCenter,
@@ -340,10 +340,18 @@ export function JobExperienceManager({ initialData, onSave }: JobExperienceManag
   };
 
   const editor = useRef(null);
+  const latestDescRef = useRef(tempData.description || '');
+
+  useEffect(() => {
+    if (tempData.description !== undefined) {
+      latestDescRef.current = tempData.description;
+    }
+  }, [tempData.description]);
 
   const handleSaveDescription = () => {
     if (!activeJobId) return;
-    const updated = jobs.map(j => j.id === activeJobId ? { ...j, description: tempData.description || '' } : j);
+    const finalDescription = latestDescRef.current || (editor.current ? (editor.current as any).value : '') || tempData.description || '';
+    const updated = jobs.map(j => j.id === activeJobId ? { ...j, description: finalDescription } : j);
     setJobs(updated);
     saveToParent(updated);
     setIsEditingContent(false);
@@ -488,19 +496,36 @@ export function JobExperienceManager({ initialData, onSave }: JobExperienceManag
           {isEditingContent ? (
             <div className="flex flex-col h-full relative">
               <div className="flex-1 min-h-0 bg-white overflow-hidden relative">
-                <div className="h-full [&>div]:h-full [&_.jodit-container]:!h-full [&_.jodit-container]:!flex [&_.jodit-container]:!flex-col [&_.jodit-workplace]:!flex-1 [&_.jodit-workplace]:!min-h-0 [&_.jodit-workplace]:!overflow-y-auto [&_.jodit-toolbar__box]:!flex-none [&_.jodit-toolbar__box]:!static !outline-none [&_.jodit-status-bar]:!flex-none [&_.jodit-container]:!border-none [&_.jodit-workplace]:!border-none pb-14">
-                  <JoditEditor
-                    ref={editor}
-                    value={tempData.description || ''}
-                    config={{
-                      readonly: false,
-                      placeholder: 'Describe your role and achievements...',
-                      height: '100%',
-                      toolbarSticky: false,
-                      buttons: ['bold', 'italic', 'underline', 'strikethrough', '|', 'ul', 'ol', '|', 'font', 'fontsize', 'brush', 'paragraph', '|', 'table', 'link', '|', 'align', 'undo', 'redo']
-                    }}
-                    onBlur={newContent => setTempData({...tempData, description: newContent})}
-                  />
+                <div className="h-full [&>div]:h-full [&_.jodit-container]:!h-full [&_.jodit-container]:!flex [&_.jodit-container]:!flex-col [&_.jodit-workplace]:!flex-1 [&_.jodit-workplace]:!min-h-0 [&_.jodit-workplace]:!overflow-y-auto [&_.jodit-toolbar__box]:!flex-none [&_.jodit-toolbar__box]:!static !outline-none [&_.jodit-status-bar]:!flex-none [&_.jodit-container]:!border-none [&_.jodit-workplace]:!border-none pb-14 flex items-center justify-center bg-white">
+                  <Suspense fallback={
+                    <div className="flex flex-col items-center justify-center gap-2 text-slate-500 font-medium">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#004a6c]" />
+                      <span className="text-sm">Loading rich text editor...</span>
+                    </div>
+                  }>
+                    <JoditEditor
+                      ref={editor}
+                      value={tempData.description || ''}
+                      config={{
+                        readonly: false,
+                        autofocus: true,
+                        placeholder: 'Describe your role and achievements...',
+                        height: '100%',
+                        toolbarSticky: false,
+                        buttons: ['bold', 'italic', 'underline', 'strikethrough', '|', 'ul', 'ol', '|', 'font', 'fontsize', 'brush', 'paragraph', '|', 'table', 'link', '|', 'align', 'undo', 'redo'],
+                        askBeforePasteHTML: false,
+                        askBeforePasteFromWord: false,
+                        defaultActionOnPaste: 'insert_as_html'
+                      }}
+                      onChange={newContent => {
+                        latestDescRef.current = newContent;
+                      }}
+                      onBlur={newContent => {
+                        latestDescRef.current = newContent;
+                        setTempData(prev => ({...prev, description: newContent}));
+                      }}
+                    />
+                  </Suspense>
                 </div>
               </div>
 
@@ -548,7 +573,7 @@ export function JobExperienceManager({ initialData, onSave }: JobExperienceManag
                   </div>
                 </div>
                 
-                <div className="prose prose-blue max-w-none prose-sm bg-blue-50/10 p-5 rounded-xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20">
+                <div className="prose prose-blue max-w-none prose-sm text-slate-600">
                    <div dangerouslySetInnerHTML={{ __html: activeJob.description || '<p class="italic text-gray-400">No details provided for this role.</p>' }} />
                 </div>
               </div>

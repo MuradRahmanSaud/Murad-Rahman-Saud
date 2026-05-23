@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Star, Award, Trophy, Heart, Circle, Layers, GripVertical } from 'lucide-react';
-import JoditEditor from 'jodit-react';
+import React, { useState, useMemo, useRef, useEffect, Suspense, lazy } from 'react';
+import { Plus, Edit2, Trash2, Star, Award, Trophy, Heart, Circle, Layers, GripVertical, Loader2 } from 'lucide-react';
+const JoditEditor = lazy(() => import('jodit-react'));
 import {
   DndContext,
   closestCenter,
@@ -290,9 +290,15 @@ export function SkillManager({ initialSkillsText, onSave }: SkillManagerProps) {
   };
 
   const editor = useRef(null);
+  const latestDescRef = useRef(tempDescription);
+
+  useEffect(() => {
+    latestDescRef.current = tempDescription;
+  }, [tempDescription]);
 
   const config = useMemo(() => ({
     readonly: false,
+    autofocus: true,
     placeholder: `Describe your ${activeSkillType} skills...`,
     height: '100%',
     minHeight: 300,
@@ -306,15 +312,19 @@ export function SkillManager({ initialSkillsText, onSave }: SkillManagerProps) {
       'image', 'file', 'link', 'symbol', '|',
       'align', 'undo', 'redo', '|',
       'hr', 'eraser', 'fullsize'
-    ]
+    ],
+    askBeforePasteHTML: false,
+    askBeforePasteFromWord: false,
+    defaultActionOnPaste: 'insert_as_html'
   }), [activeSkillType]);
 
   const handleSaveContent = () => {
     if (!activeSkillType) return;
     
+    const finalDescription = latestDescRef.current || (editor.current ? (editor.current as any).value : '') || tempDescription;
     // Transform Google Drive links to robust direct image URLs and ensure referrerpolicy is set
     // We use lh3.googleusercontent.com/d/ID which is often more reliable than uc?id=ID
-    const transformedDescription = tempDescription
+    const transformedDescription = finalDescription
       .replace(
         /src="https?:\/\/(?:drive|docs)\.google\.com\/(?:file\/d\/|open\?id=)([^/?#&"]+)[^"]*"/g,
         'src="https://lh3.googleusercontent.com/d/$1"'
@@ -507,13 +517,26 @@ export function SkillManager({ initialSkillsText, onSave }: SkillManagerProps) {
 
               <div className="flex-1 min-h-0 bg-white overflow-hidden relative">
                 {editTab === 'text' ? (
-                  <div className="h-full [&>div]:h-full [&_.jodit-container]:!h-full [&_.jodit-container]:!flex [&_.jodit-container]:!flex-col [&_.jodit-workplace]:!flex-1 [&_.jodit-workplace]:!min-h-0 [&_.jodit-workplace]:!overflow-y-auto [&_.jodit-toolbar__box]:!flex-none [&_.jodit-toolbar__box]:!static !outline-none [&_.jodit-status-bar]:!flex-none [&_.jodit-container]:!border-none [&_.jodit-workplace]:!border-none pb-14">
-                    <JoditEditor
-                      ref={editor}
-                      value={tempDescription}
-                      config={{...config, height: '100%', minHeight: undefined, toolbarSticky: false}}
-                      onBlur={newContent => setTempDescription(newContent)}
-                    />
+                  <div className="h-full [&>div]:h-full [&_.jodit-container]:!h-full [&_.jodit-container]:!flex [&_.jodit-container]:!flex-col [&_.jodit-workplace]:!flex-1 [&_.jodit-workplace]:!min-h-0 [&_.jodit-workplace]:!overflow-y-auto [&_.jodit-toolbar__box]:!flex-none [&_.jodit-toolbar__box]:!static !outline-none [&_.jodit-status-bar]:!flex-none [&_.jodit-container]:!border-none [&_.jodit-workplace]:!border-none pb-14 flex items-center justify-center bg-white">
+                    <Suspense fallback={
+                      <div className="flex flex-col items-center justify-center gap-2 text-slate-500 font-medium">
+                        <Loader2 className="w-8 h-8 animate-spin text-[#004a6c]" />
+                        <span className="text-sm">Loading rich text editor...</span>
+                      </div>
+                    }>
+                      <JoditEditor
+                        ref={editor}
+                        value={tempDescription}
+                        config={{...config, height: '100%', minHeight: undefined, toolbarSticky: false}}
+                        onChange={newContent => {
+                          latestDescRef.current = newContent;
+                        }}
+                        onBlur={newContent => {
+                          latestDescRef.current = newContent;
+                          setTempDescription(newContent);
+                        }}
+                      />
+                    </Suspense>
                   </div>
                 ) : (
                   <div className="h-full overflow-y-auto p-4 pb-20 bg-gray-50">
@@ -698,7 +721,7 @@ export function SkillManager({ initialSkillsText, onSave }: SkillManagerProps) {
                 )}
                 
                 {hasCleanDescription(activeSkill?.description) && (
-                  <div className="skill-content-html prose prose-blue max-w-none prose-sm bg-blue-50/10 p-5 rounded-xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20 text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: activeSkill.description }} />
+                  <div className="skill-content-html prose prose-blue max-w-none prose-sm text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: activeSkill.description }} />
                 )}
 
                   {activeSkill?.applications && activeSkill.applications.length > 0 && (

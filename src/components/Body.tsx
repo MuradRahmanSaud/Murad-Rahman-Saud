@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, Suspense, lazy } from 'react';
 import { Edit2, Check, X, Loader2, Star, Award, Trophy, Heart, Circle, Briefcase, GraduationCap, Phone, Mail, MapPin, Link as LinkIcon, Contact } from 'lucide-react';
-import JoditEditor from 'jodit-react';
+
+const JoditEditor = lazy(() => import('jodit-react'));
 import { SkillManager } from './SkillManager';
 import { JobExperienceManager } from './JobExperienceManager';
 import { EducationBackgroundManager } from './EducationBackgroundManager';
@@ -143,242 +144,254 @@ export function Body({
     }
   };
 
-  const tabContent: Record<string, React.ReactNode> = {
-    'Job Experience': (
-        <div className="relative flex-1 flex flex-col min-h-0">
+  const renderTabContent = (tab: string) => {
+    switch (tab) {
+      case 'Job Experience':
+        return (
+          <div className="relative flex-1 flex flex-col min-h-0">
             <JobExperienceManager 
               initialData={data['Job Experiance'] || data['Job Experience'] || ''} 
               onSave={handleSaveExperience} 
             />
             {isUpdatingExperience && (
-                <div className="absolute top-4 right-4 z-50">
-                    <Loader2 className="w-5 h-5 text-[#004a6c] animate-spin" />
-                </div>
+              <div className="absolute top-4 right-4 z-50">
+                <Loader2 className="w-5 h-5 text-[#004a6c] animate-spin" />
+              </div>
             )}
-        </div>
-    ),
-    'Education Background': (
-        <div className="relative flex-1 flex flex-col min-h-0">
+          </div>
+        );
+      case 'Education Background':
+        return (
+          <div className="relative flex-1 flex flex-col min-h-0">
             <EducationBackgroundManager 
               initialData={data['Education Background'] || ''} 
               onSave={handleSaveEducation} 
             />
             {isUpdatingEducation && (
-                <div className="absolute top-4 right-4 z-50">
-                    <Loader2 className="w-5 h-5 text-[#004a6c] animate-spin" />
-                </div>
+              <div className="absolute top-4 right-4 z-50">
+                <Loader2 className="w-5 h-5 text-[#004a6c] animate-spin" />
+              </div>
             )}
-        </div>
-    ),
-    'Skills': (
-        <div className="relative flex-1 flex flex-col min-h-0">
+          </div>
+        );
+      case 'Skills':
+        return (
+          <div className="relative flex-1 flex flex-col min-h-0">
             <SkillManager initialSkillsText={data['My Skills'] || '[]'} onSave={handleSaveSkills} />
             {isUpdatingSkills && (
-                <div className="absolute top-0 right-0 p-2">
-                    <Loader2 className="w-4 h-4 text-[#004a6c] animate-spin" />
-                </div>
+              <div className="absolute top-0 right-0 p-2">
+                <Loader2 className="w-4 h-4 text-[#004a6c] animate-spin" />
+              </div>
             )}
-        </div>
-    ),
-    'Certifications': (
-      <div className="prose prose-blue max-w-none prose-sm bg-blue-50/10 p-5 rounded-xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20 mt-2 text-slate-600">
-        <FormattedText text={data['Certifications'] || 'No certifications listed.'} />
-      </div>
-    ),
-    'Achievements': (
-      <div className="prose prose-blue max-w-none prose-sm bg-blue-50/10 p-5 rounded-xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20 mt-2 text-slate-600">
-        {data['Achievements'] && <FormattedText text={data['Achievements']} />}
-        {data['Success Stories'] && (
-          <div className="mt-3">
-            <FormattedText text={data['Success Stories']} />
           </div>
-        )}
-        {!data['Achievements'] && !data['Success Stories'] && <p className="italic text-gray-400">No achievements listed.</p>}
-      </div>
-    ),
-    'Interests': (
-      <div className="prose prose-blue max-w-none prose-sm bg-blue-50/10 p-5 rounded-xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20 mt-2 text-slate-600">
-        <FormattedText text={data['Interests'] || 'No interests listed.'} />
-      </div>
-    ),
-    'Contact': (
-      <div className="p-5 bg-blue-50/10 border border-blue-50/50 rounded-xl mt-2 flex flex-col gap-5 relative">
-        {isEditingContact ? (
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                <Contact className="w-4 h-4 text-[#004a6c]" />
-                Edit Contact Information
-              </h3>
-              <button 
-                onClick={() => setIsEditingContact(false)} 
-                className="text-slate-400 hover:text-slate-600 text-xs"
-              >
-                Cancel
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1.5 text-left">
-                <label className="text-[11px] uppercase tracking-wider text-slate-500 font-bold flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-[#004a6c]" /> Phone Number
-                </label>
-                <input
-                  type="text"
-                  value={contactForm.mobile}
-                  onChange={(e) => setContactForm(prev => ({ ...prev, mobile: e.target.value }))}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 outline-none focus:border-[#004a6c] tracking-wide"
-                  placeholder="+880 1XXX XXXXXX"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5 text-left">
-                <label className="text-[11px] uppercase tracking-wider text-slate-500 font-bold flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-[#004a6c]" /> Email Address
-                </label>
-                <input
-                  type="email"
-                  value={contactForm.email}
-                  onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 outline-none focus:border-[#004a6c]"
-                  placeholder="example@mail.com"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5 text-left">
-                <label className="text-[11px] uppercase tracking-wider text-slate-500 font-bold flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#004a6c]" /> Location / Address
-                </label>
-                <input
-                  type="text"
-                  value={contactForm.address}
-                  onChange={(e) => setContactForm(prev => ({ ...prev, address: e.target.value }))}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 outline-none focus:border-[#004a6c]"
-                  placeholder="Dhaka, Bangladesh"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5 text-left">
-                <label className="text-[11px] uppercase tracking-wider text-slate-500 font-bold flex items-center gap-1.5">
-                  <LinkIcon className="w-3.5 h-3.5 text-[#004a6c]" /> LinkedIn / Social
-                </label>
-                <input
-                  type="text"
-                  value={contactForm.social}
-                  onChange={(e) => setContactForm(prev => ({ ...prev, social: e.target.value }))}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 outline-none focus:border-[#004a6c]"
-                  placeholder="linkedin.com/in/username"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2.5 border-t border-slate-100 pt-3 mt-2">
-              <button 
-                onClick={() => setIsEditingContact(false)}
-                className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-[#004a6c]/70 hover:text-[#004a6c] rounded-lg hover:bg-slate-100 transition-colors"
-                disabled={isSavingContact}
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handleSaveContact}
-                disabled={isSavingContact}
-                className="bg-[#004a6c] text-white px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 hover:bg-[#003c58] disabled:opacity-50 transition-colors shadow-sm"
-              >
-                {isSavingContact ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-                Save Details
-              </button>
-            </div>
+        );
+      case 'Certifications':
+        return (
+          <div className="prose prose-blue max-w-none prose-sm mt-2 text-slate-600">
+            <FormattedText text={data['Certifications'] || 'No certifications listed.'} />
           </div>
-        ) : (
-          <div className="flex flex-col gap-6">
-            <div className="flex justify-between items-center border-b border-slate-200/60 pb-2">
-              <h3 className="font-bold text-slate-800 text-sm tracking-wider uppercase flex items-center gap-2">
-                <Contact className="w-4 h-4 text-[#004a6c]" />
-                Contact Details
-              </h3>
-              <button
-                onClick={handleStartEditContact}
-                className="flex items-center gap-1 px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-white text-xs font-bold text-[#004a6c] transition-all"
-              >
-                <Edit2 className="w-3" /> Edit Contact
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Phone card */}
-              <div className="flex items-start gap-4 p-4 bg-white border border-slate-100 hover:border-slate-200/80 rounded-xl transition-all shadow-sm">
-                <div className="p-2.5 bg-blue-50 text-[#004a6c] rounded-xl shrink-0">
-                  <Phone className="w-5 h-5 flex-shrink-0" />
-                </div>
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Phone</span>
-                  <span className="text-sm font-semibold text-slate-700 break-words">
-                    {mobile || <span className="text-slate-400 italic font-normal">Not Provided</span>}
-                  </span>
-                </div>
+        );
+      case 'Achievements':
+        return (
+          <div className="prose prose-blue max-w-none prose-sm mt-2 text-slate-600">
+            {data['Achievements'] && <FormattedText text={data['Achievements']} />}
+            {data['Success Stories'] && (
+              <div className="mt-3">
+                <FormattedText text={data['Success Stories']} />
               </div>
-
-              {/* Email card */}
-              <div className="flex items-start gap-4 p-4 bg-white border border-slate-100 hover:border-slate-200/80 rounded-xl transition-all shadow-sm">
-                <div className="p-2.5 bg-blue-50 text-[#004a6c] rounded-xl shrink-0">
-                  <Mail className="w-5 h-5 flex-shrink-0" />
-                </div>
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Email Address</span>
-                  {email ? (
-                    <a href={`mailto:${email}`} className="text-sm font-semibold text-slate-700 break-all hover:text-[#004a6c] hover:underline">
-                      {email}
-                    </a>
-                  ) : (
-                    <span className="text-sm text-slate-400 italic font-normal">Not Provided</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Location card */}
-              <div className="flex items-start gap-4 p-4 bg-white border border-slate-100 hover:border-slate-200/80 rounded-xl transition-all shadow-sm">
-                <div className="p-2.5 bg-blue-50 text-[#004a6c] rounded-xl shrink-0">
-                  <MapPin className="w-5 h-5 flex-shrink-0" />
-                </div>
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Location / Address</span>
-                  <span className="text-sm font-semibold text-slate-700 break-words">
-                    {address || <span className="text-slate-400 italic font-normal">Not Provided</span>}
-                  </span>
-                </div>
-              </div>
-
-              {/* LinkedIn card */}
-              <div className="flex items-start gap-4 p-4 bg-white border border-slate-100 hover:border-slate-200/80 rounded-xl transition-all shadow-sm">
-                <div className="p-2.5 bg-blue-50 text-[#004a6c] rounded-xl shrink-0">
-                  <LinkIcon className="w-5 h-5 flex-shrink-0" />
-                </div>
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">LinkedIn / Web Portfolio</span>
-                  {social ? (
-                    <a 
-                      href={social.startsWith('http') ? social : `https://${social}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-sm font-semibold text-slate-700 break-words hover:text-[#004a6c] hover:underline"
-                    >
-                      {social}
-                    </a>
-                  ) : (
-                    <span className="text-sm text-slate-400 italic font-normal">Not Provided</span>
-                  )}
-                </div>
-              </div>
-            </div>
+            )}
+            {!data['Achievements'] && !data['Success Stories'] && <p className="italic text-gray-400">No achievements listed.</p>}
           </div>
-        )}
-      </div>
-    ),
+        );
+      case 'Interests':
+        return (
+          <div className="prose prose-blue max-w-none prose-sm mt-2 text-slate-600">
+            <FormattedText text={data['Interests'] || 'No interests listed.'} />
+          </div>
+        );
+      case 'Contact':
+        return (
+          <div className="p-5 bg-blue-50/10 border border-blue-50/50 rounded-xl mt-2 flex flex-col gap-5 relative">
+            {isEditingContact ? (
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                  <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <Contact className="w-4 h-4 text-[#004a6c]" />
+                    Edit Contact Information
+                  </h3>
+                  <button 
+                    onClick={() => setIsEditingContact(false)} 
+                    className="text-slate-400 hover:text-slate-600 text-xs"
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5 text-left">
+                    <label className="text-[11px] uppercase tracking-wider text-slate-500 font-bold flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-[#004a6c]" /> Phone Number
+                    </label>
+                    <input
+                      type="text"
+                      value={contactForm.mobile}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, mobile: e.target.value }))}
+                      className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 outline-none focus:border-[#004a6c] tracking-wide"
+                      placeholder="+880 1XXX XXXXXX"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 text-left">
+                    <label className="text-[11px] uppercase tracking-wider text-slate-500 font-bold flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5 text-[#004a6c]" /> Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                      className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 outline-none focus:border-[#004a6c]"
+                      placeholder="example@mail.com"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 text-left">
+                    <label className="text-[11px] uppercase tracking-wider text-slate-500 font-bold flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-[#004a6c]" /> Location / Address
+                    </label>
+                    <input
+                      type="text"
+                      value={contactForm.address}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, address: e.target.value }))}
+                      className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 outline-none focus:border-[#004a6c]"
+                      placeholder="Dhaka, Bangladesh"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 text-left">
+                    <label className="text-[11px] uppercase tracking-wider text-slate-500 font-bold flex items-center gap-1.5">
+                      <LinkIcon className="w-3.5 h-3.5 text-[#004a6c]" /> LinkedIn / Social
+                    </label>
+                    <input
+                      type="text"
+                      value={contactForm.social}
+                      onChange={(e) => setContactForm(prev => ({ ...prev, social: e.target.value }))}
+                      className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 outline-none focus:border-[#004a6c]"
+                      placeholder="linkedin.com/in/username"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2.5 border-t border-slate-100 pt-3 mt-2">
+                  <button 
+                    onClick={() => setIsEditingContact(false)}
+                    className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-[#004a6c]/70 hover:text-[#004a6c] rounded-lg hover:bg-slate-100 transition-colors"
+                    disabled={isSavingContact}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleSaveContact}
+                    disabled={isSavingContact}
+                    className="bg-[#004a6c] text-white px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 hover:bg-[#003c58] disabled:opacity-50 transition-colors shadow-sm"
+                  >
+                    {isSavingContact ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    Save Details
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-6">
+                <div className="flex justify-between items-center border-b border-slate-200/60 pb-2">
+                  <h3 className="font-bold text-slate-800 text-sm tracking-wider uppercase flex items-center gap-2">
+                    <Contact className="w-4 h-4 text-[#004a6c]" />
+                    Contact Details
+                  </h3>
+                  <button
+                    onClick={handleStartEditContact}
+                    className="flex items-center gap-1 px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-white text-xs font-bold text-[#004a6c] transition-all"
+                  >
+                    <Edit2 className="w-3" /> Edit Contact
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Phone card */}
+                  <div className="flex items-start gap-4 p-4 bg-white border border-slate-100 hover:border-slate-200/80 rounded-xl transition-all shadow-sm">
+                    <div className="p-2.5 bg-blue-50 text-[#004a6c] rounded-xl shrink-0">
+                      <Phone className="w-5 h-5 flex-shrink-0" />
+                    </div>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Phone</span>
+                      <span className="text-sm font-semibold text-slate-700 break-words">
+                        {mobile || <span className="text-slate-400 italic font-normal">Not Provided</span>}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Email card */}
+                  <div className="flex items-start gap-4 p-4 bg-white border border-slate-100 hover:border-slate-200/80 rounded-xl transition-all shadow-sm">
+                    <div className="p-2.5 bg-blue-50 text-[#004a6c] rounded-xl shrink-0">
+                      <Mail className="w-5 h-5 flex-shrink-0" />
+                    </div>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Email Address</span>
+                      {email ? (
+                        <a href={`mailto:${email}`} className="text-sm font-semibold text-slate-700 break-all hover:text-[#004a6c] hover:underline">
+                          {email}
+                        </a>
+                      ) : (
+                        <span className="text-sm text-slate-400 italic font-normal">Not Provided</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Location card */}
+                  <div className="flex items-start gap-4 p-4 bg-white border border-slate-100 hover:border-slate-200/80 rounded-xl transition-all shadow-sm">
+                    <div className="p-2.5 bg-blue-50 text-[#004a6c] rounded-xl shrink-0">
+                      <MapPin className="w-5 h-5 flex-shrink-0" />
+                    </div>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Location / Address</span>
+                      <span className="text-sm font-semibold text-slate-700 break-words">
+                        {address || <span className="text-slate-400 italic font-normal">Not Provided</span>}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* LinkedIn card */}
+                  <div className="flex items-start gap-4 p-4 bg-white border border-slate-100 hover:border-slate-200/80 rounded-xl transition-all shadow-sm">
+                    <div className="p-2.5 bg-blue-50 text-[#004a6c] rounded-xl shrink-0">
+                      <LinkIcon className="w-5 h-5 flex-shrink-0" />
+                    </div>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">LinkedIn / Web Portfolio</span>
+                      {social ? (
+                        <a 
+                          href={social.startsWith('http') ? social : `https://${social}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-sm font-semibold text-slate-700 break-words hover:text-[#004a6c] hover:underline"
+                        >
+                          {social}
+                        </a>
+                      ) : (
+                        <span className="text-sm text-slate-400 italic font-normal">Not Provided</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   const titleConfig = useMemo(() => ({
     readonly: isUpdatingTitle,
+    autofocus: true,
     placeholder: 'Enter short description...',
     statusbar: false,
     height: 120,
@@ -395,7 +408,21 @@ export function Body({
           navigator.clipboard.readText().then(text => {
             const escapedText = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
             // @ts-ignore
-            this.selection.insertHTML(escapedText);
+            this.focus();
+            try {
+              // @ts-ignore
+              const sObj = this.s || this.selection;
+              if (sObj && typeof sObj.insertHTML === 'function') {
+                sObj.insertHTML(escapedText);
+              } else {
+                // @ts-ignore
+                this.value += escapedText;
+              }
+            } catch (err) {
+              console.warn('Fallback paste:', err);
+              // @ts-ignore
+              this.value += escapedText;
+            }
           }).catch(err => {
             console.error('Clipboard read failed: ', err);
           });
@@ -406,6 +433,7 @@ export function Body({
   
   const summaryConfig = useMemo(() => ({
     readonly: isUpdatingSummary,
+    autofocus: true,
     placeholder: 'Enter your professional summary...',
     statusbar: false,
     height: typeof window !== 'undefined' && window.innerWidth < 640 ? 200 : 250,
@@ -422,7 +450,21 @@ export function Body({
           navigator.clipboard.readText().then(text => {
             const escapedText = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
             // @ts-ignore
-            this.selection.insertHTML(escapedText);
+            this.focus();
+            try {
+              // @ts-ignore
+              const sObj = this.s || this.selection;
+              if (sObj && typeof sObj.insertHTML === 'function') {
+                sObj.insertHTML(escapedText);
+              } else {
+                // @ts-ignore
+                this.value += escapedText;
+              }
+            } catch (err) {
+              console.warn('Fallback paste:', err);
+              // @ts-ignore
+              this.value += escapedText;
+            }
           }).catch(err => {
             console.error('Clipboard read failed: ', err);
           });
@@ -531,12 +573,18 @@ export function Body({
 
           {isEditingTitle && (
             <div className="absolute top-0 left-0 mt-6 z-50 w-[90vw] max-w-[600px] flex flex-col gap-2 bg-white p-3 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-100" style={{ transform: 'translateY(0%)' }}>
-              <div className="border border-slate-200 rounded overflow-hidden">
-                <JoditEditor
-                  value={editedTitle}
-                  config={titleConfig}
-                  onBlur={newContent => setEditedTitle(newContent)}
-                />
+              <div className="border border-slate-200 rounded overflow-hidden bg-slate-50 min-h-[120px] flex items-center justify-center">
+                <Suspense fallback={
+                  <div className="flex items-center gap-2 p-4 text-xs text-slate-500 font-medium">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#004a6c]" /> Loading Editor...
+                  </div>
+                }>
+                  <JoditEditor
+                    value={editedTitle}
+                    config={titleConfig}
+                    onBlur={newContent => setEditedTitle(newContent)}
+                  />
+                </Suspense>
               </div>
               <div className="flex justify-end items-center gap-2">
                 {isUpdatingTitle ? (
@@ -578,12 +626,18 @@ export function Body({
           </div>
           {isEditingSummary ? (
             <div className="flex flex-col gap-3">
-              <div className="border border-slate-200 rounded overflow-hidden">
-                <JoditEditor
-                  value={editedSummary}
-                  config={summaryConfig}
-                  onBlur={newContent => setEditedSummary(newContent)}
-                />
+              <div className="border border-slate-200 rounded overflow-hidden bg-slate-50 min-h-[200px] flex items-center justify-center">
+                <Suspense fallback={
+                  <div className="flex items-center gap-2 p-4 text-xs text-slate-500 font-medium">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#004a6c]" /> Loading Editor...
+                  </div>
+                }>
+                  <JoditEditor
+                    value={editedSummary}
+                    config={summaryConfig}
+                    onBlur={newContent => setEditedSummary(newContent)}
+                  />
+                </Suspense>
               </div>
               <div className="flex justify-end items-center gap-2">
                   {isUpdatingSummary ? (
@@ -649,7 +703,7 @@ export function Body({
             })}
           </div>
           <div className={`py-2 flex-1 min-h-0 ${['Skills', 'Job Experience', 'Education Background'].includes(activeTab) ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>
-            {tabContent[activeTab]}
+            {renderTabContent(activeTab)}
           </div>
         </section>
 

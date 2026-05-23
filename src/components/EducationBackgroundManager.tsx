@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Plus, Edit2, Trash2, GripVertical, GraduationCap, Award } from 'lucide-react';
-import JoditEditor from 'jodit-react';
+import React, { useState, useMemo, useRef, useEffect, Suspense, lazy } from 'react';
+import { Plus, Edit2, Trash2, GripVertical, GraduationCap, Award, Loader2 } from 'lucide-react';
+const JoditEditor = lazy(() => import('jodit-react'));
 import {
   DndContext,
   closestCenter,
@@ -348,10 +348,18 @@ export function EducationBackgroundManager({ initialData, onSave }: EducationBac
   };
 
   const editor = useRef(null);
+  const latestDescRef = useRef(tempData.description || '');
+
+  useEffect(() => {
+    if (tempData.description !== undefined) {
+      latestDescRef.current = tempData.description;
+    }
+  }, [tempData.description]);
 
   const handleSaveDescription = () => {
     if (!activeEduId) return;
-    const updated = educations.map(e => e.id === activeEduId ? { ...e, description: tempData.description || '' } : e);
+    const finalDescription = latestDescRef.current || (editor.current ? (editor.current as any).value : '') || tempData.description || '';
+    const updated = educations.map(e => e.id === activeEduId ? { ...e, description: finalDescription } : e);
     setEducations(updated);
     saveToParent(updated);
     setIsEditingContent(false);
@@ -493,19 +501,36 @@ export function EducationBackgroundManager({ initialData, onSave }: EducationBac
           {isEditingContent ? (
             <div className="flex flex-col h-full relative">
               <div className="flex-1 min-h-0 bg-white overflow-hidden relative">
-                <div className="h-full [&>div]:h-full [&_.jodit-container]:!h-full [&_.jodit-container]:!flex [&_.jodit-container]:!flex-col [&_.jodit-workplace]:!flex-1 [&_.jodit-workplace]:!min-h-0 [&_.jodit-workplace]:!overflow-y-auto [&_.jodit-toolbar__box]:!flex-none [&_.jodit-toolbar__box]:!static !outline-none [&_.jodit-status-bar]:!flex-none [&_.jodit-container]:!border-none [&_.jodit-workplace]:!border-none pb-14">
-                  <JoditEditor
-                    ref={editor}
-                    value={tempData.description || ''}
-                    config={{
-                      readonly: false,
-                      placeholder: 'Describe your learning, major achievements, projects inside the academy...',
-                      height: '100%',
-                      toolbarSticky: false,
-                      buttons: ['bold', 'italic', 'underline', 'strikethrough', '|', 'ul', 'ol', '|', 'font', 'fontsize', 'brush', 'paragraph', '|', 'table', 'link', '|', 'align', 'undo', 'redo']
-                    }}
-                    onBlur={newContent => setTempData({...tempData, description: newContent})}
-                  />
+                <div className="h-full [&>div]:h-full [&_.jodit-container]:!h-full [&_.jodit-container]:!flex [&_.jodit-container]:!flex-col [&_.jodit-workplace]:!flex-1 [&_.jodit-workplace]:!min-h-0 [&_.jodit-workplace]:!overflow-y-auto [&_.jodit-toolbar__box]:!flex-none [&_.jodit-toolbar__box]:!static !outline-none [&_.jodit-status-bar]:!flex-none [&_.jodit-container]:!border-none [&_.jodit-workplace]:!border-none pb-14 flex items-center justify-center">
+                  <Suspense fallback={
+                    <div className="flex flex-col items-center justify-center gap-2 text-slate-500 font-medium">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#004a6c]" />
+                      <span className="text-sm">Loading rich text editor...</span>
+                    </div>
+                  }>
+                    <JoditEditor
+                      ref={editor}
+                      value={tempData.description || ''}
+                      config={{
+                        readonly: false,
+                        autofocus: true,
+                        placeholder: 'Describe your learning, major achievements, projects inside the academy...',
+                        height: '100%',
+                        toolbarSticky: false,
+                        buttons: ['bold', 'italic', 'underline', 'strikethrough', '|', 'ul', 'ol', '|', 'font', 'fontsize', 'brush', 'paragraph', '|', 'table', 'link', '|', 'align', 'undo', 'redo'],
+                        askBeforePasteHTML: false,
+                        askBeforePasteFromWord: false,
+                        defaultActionOnPaste: 'insert_as_html'
+                      }}
+                      onChange={newContent => {
+                        latestDescRef.current = newContent;
+                      }}
+                      onBlur={newContent => {
+                        latestDescRef.current = newContent;
+                        setTempData(prev => ({...prev, description: newContent}));
+                      }}
+                    />
+                  </Suspense>
                 </div>
               </div>
 
@@ -525,39 +550,41 @@ export function EducationBackgroundManager({ initialData, onSave }: EducationBac
               </div>
             </div>
           ) : activeEdu ? (
-            <div className="flex flex-col h-full min-h-0 group">
-              <div className="flex-1 overflow-y-auto px-5 py-6">
-                <div className="mb-5 text-center flex flex-col items-center">
-                  <h1 className="text-[clamp(1.1rem,1.75vw,1.45rem)] font-bold text-[#041e49] mb-1.5 uppercase tracking-tight">{activeEdu.degree}</h1>
-                  <div className="flex items-center gap-2.5 text-blue-600 font-bold text-xs md:text-sm">
-                    <span className="uppercase tracking-widest">{activeEdu.institution}</span>
+            <div className="flex flex-col h-full min-h-0 group relative">
+              {/* Compact Header for Education metadata */}
+              <div className="shrink-0 border-b border-gray-100 bg-gray-50/10 px-6 py-3.5">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
+                  <div className="min-w-0">
+                    <h1 className="text-xs md:text-sm font-bold text-[#041e49] uppercase tracking-wider truncate">
+                      {activeEdu.degree}
+                    </h1>
+                    <div className="text-[10px] md:text-xs text-blue-600 font-bold uppercase tracking-wider truncate mt-0.5">
+                      {activeEdu.institution}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-[10px] md:text-xs font-medium text-gray-400 whitespace-nowrap md:text-right shrink-0 mt-0.5 md:mt-0">
                     {(activeEdu.fromDate || activeEdu.toDate) && (
-                      <>
-                        <span className="text-gray-300">•</span>
-                        <span className="text-gray-500 font-medium">
-                          {formatDate(activeEdu.fromDate)} - {getToDateDisplay(activeEdu.toDate)}
-                          {activeEdu.result && <span className="text-gray-400 font-medium italic ml-1">({activeEdu.result})</span>}
-                        </span>
-                      </>
+                      <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-semibold text-[9px] uppercase tracking-wider">
+                        {formatDate(activeEdu.fromDate)} - {getToDateDisplay(activeEdu.toDate)}
+                      </span>
+                    )}
+                    {activeEdu.result && (
+                      <span className="text-[#041e49] font-bold bg-[#d3e3fd]/40 px-2 py-0.5 rounded-md border border-blue-100/30 text-[9px] uppercase tracking-wider">
+                        {activeEdu.result}
+                      </span>
                     )}
                   </div>
-                  <div className="mt-4 flex items-center gap-3">
-                    <div className="h-[1px] w-12 bg-gray-200 rounded-full" />
-                    <div className="flex gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#26c6da]" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#5c6bc0]" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#7e57c2]" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#ab47bc]" />
-                    </div>
-                    <div className="h-[1px] w-12 bg-gray-200 rounded-full" />
-                  </div>
                 </div>
-                
-                <div className="prose prose-blue max-w-none prose-sm bg-blue-50/10 p-5 rounded-xl border border-blue-50/50 shadow-sm transition-all hover:bg-blue-50/20">
+              </div>
+
+              {/* Scrollable Description Container */}
+              <div className="flex-1 overflow-y-auto px-6 pt-1.5 pb-6 min-h-0">
+                <div className="prose prose-blue max-w-none prose-sm text-slate-600 [&_>div>*:first-child]:mt-0 [&_h1]:mt-3 [&_h1]:mb-1 [&_h2]:mt-2.5 [&_h2]:mb-1 [&_h3]:mt-2 [&_h3]:mb-0.5 [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5">
                    <div dangerouslySetInnerHTML={{ __html: activeEdu.description || '<p class="italic text-gray-400">No details provided for this education entry.</p>' }} />
                 </div>
               </div>
 
+              {/* Edit Details Action Trigger overlay */}
               <div className="absolute bottom-4 right-4 p-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button 
                   onClick={() => { setTempData(activeEdu); setIsEditingContent(true); }}

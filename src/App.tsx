@@ -5,7 +5,6 @@ import { Sidebar } from './components/Sidebar';
 import { Body } from './components/Body';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { motion } from 'motion/react';
-import JoditEditor from 'jodit-react';
 
 const DARK_BLUE = '#004a6c';
 const YELLOW = '#f1b700';
