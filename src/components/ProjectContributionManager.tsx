@@ -465,7 +465,7 @@ export function ProjectContributionManager({ initialData, onSave }: ProjectContr
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-2 pb-6 min-h-0">
+          <div className="flex-1 overflow-y-auto pr-2 pb-6 min-h-0 space-y-0.5">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={projects.map(p => p.id)} strategy={verticalListSortingStrategy}>
                 <div className="flex flex-col gap-0.5">
