@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect, Suspense, lazy } from 'react';
-import { Plus, Edit2, Trash2, Star, Award, Trophy, Heart, Circle, Layers, GripVertical, Loader2 } from 'lucide-react';
+import ReactDOM from 'react-dom';
+import { Plus, Edit2, Trash2, Star, Award, Trophy, Heart, Circle, Layers, GripVertical, Loader2, BookOpen } from 'lucide-react';
+import { SkillsMaterial } from './SkillsMaterial';
 const JoditEditor = lazy(() => import('jodit-react'));
 import {
   DndContext,
@@ -111,7 +113,7 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group/item relative w-full flex items-center min-h-[2.1rem] py-1 cursor-pointer transition-all pr-4 rounded-r-full ${
+      className={`group/item relative w-full flex items-center min-h-[2.5rem] py-2 pl-1 cursor-pointer transition-all pr-2 rounded-r-full ${
         activeSkillType === skill.type 
           ? 'bg-[#d3e3fd] text-[#041e49] font-bold' 
           : 'text-[#444746] hover:bg-[#e9eaeb]'
@@ -193,6 +195,7 @@ export function SkillManager({ initialSkillsText, onSave }: SkillManagerProps) {
   const [tempDescription, setTempDescription] = useState('');
   const [tempApplications, setTempApplications] = useState<Application[]>([]);
   const [newApp, setNewApp] = useState<Partial<Application>>({});
+  const [showTutorials, setShowTutorials] = useState(false);
 
   useEffect(() => {
     try {
@@ -382,6 +385,15 @@ export function SkillManager({ initialSkillsText, onSave }: SkillManagerProps) {
     return <Award className="w-4 h-4 shrink-0" style={{ color: color.main }} />;
   };
 
+  if (showTutorials) {
+    return ReactDOM.createPortal(
+      <div className="fixed inset-0 z-[9999] bg-white">
+        <SkillsMaterial onBack={() => setShowTutorials(false)} />
+      </div>,
+      document.body
+    );
+  }
+
   return (
     <div className="flex flex-col h-full flex-1 min-h-0 bg-[#f6f8fc] rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
       <div className="flex flex-1 min-h-0 gap-0">
@@ -397,6 +409,13 @@ export function SkillManager({ initialSkillsText, onSave }: SkillManagerProps) {
                   title="Add Category"
                 >
                   <Plus size={16} />
+                </button>
+                <button 
+                  onClick={() => setShowTutorials(true)}
+                  className="p-1 hover:bg-gray-200 rounded-full transition-colors text-[#444746]"
+                  title="Tutorial Materials"
+                >
+                  <BookOpen size={16} />
                 </button>
                 {activeSkill && (
                   <>

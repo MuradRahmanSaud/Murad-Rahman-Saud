@@ -150,7 +150,7 @@ const SortableProjectItem: React.FC<SortableProjectItemProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group/item relative w-full flex items-center min-h-[2.1rem] py-1 cursor-pointer transition-all pr-4 rounded-r-full ${
+      className={`group/item relative w-full flex items-center min-h-[2.5rem] py-2 pl-1 cursor-pointer transition-all pr-2 rounded-r-full ${
         activeProjId === project.id 
           ? 'bg-[#d3e3fd] text-[#041e49] font-bold' 
           : 'text-[#444746] hover:bg-[#e9eaeb]'

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Phone, Mail, Link as LinkIcon, MapPin, Edit2, ImagePlus, Check, X, Loader2, RefreshCw, Briefcase, GraduationCap, Contact as ContactIcon, Star, Code } from 'lucide-react';
+import { Phone, Mail, Link as LinkIcon, MapPin, Edit2, ImagePlus, Check, X, Loader2, RefreshCw, Briefcase, GraduationCap, Contact as ContactIcon, Star, Code, Heart } from 'lucide-react';
 import { FormattedText } from './FormattedText';
 import { ExperienceTimeline } from './ExperienceTimeline';
 import { parseEducation, getYearOnly } from './EducationBackgroundManager';
@@ -337,11 +337,11 @@ export function Sidebar({
         {/* EXPERIENCE DISLPAY IN SIDEBAR */}
         {jobEntries.length > 0 && (
           <div className="flex flex-col gap-1 text-white relative mt-12">
-            <div className="flex items-center justify-between border-b border-white/10 pb-1">
+            <div className="flex items-center justify-between border-b border-white/15 pb-1.5">
               <div className="flex items-baseline gap-1.5 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <Briefcase className="w-3 h-3" />
-                  <h2 className="text-[0.75rem] font-bold tracking-widest uppercase whitespace-nowrap">Job Experience</h2>
+                  <Briefcase className="w-3.5 h-3.5 text-[#f1b700]" />
+                  <h2 className="text-[0.875rem] font-extrabold tracking-widest uppercase whitespace-nowrap text-[#f1b700]">Job Experience</h2>
                 </div>
                 {currentExperience && (
                   <span className="text-[0.5625rem] text-[#f1b700] font-bold uppercase tracking-tight italic truncate">
@@ -370,6 +370,9 @@ export function Sidebar({
                     <div className="flex flex-col gap-0.5">
                       <div className="flex flex-col leading-tight">
                         <span className="text-[13px] font-bold text-white group-hover/job-side:text-[#f1b700] transition-colors">{job.title}</span>
+                        {job.organization && (
+                          <span className="text-[12px] text-gray-300 font-medium group-hover/job-side:text-white/90 transition-colors">{job.organization}</span>
+                        )}
                         {dateDisplay && (
                           <span className="text-[11px] text-gray-400 group-hover/job-side:text-white/80 transition-colors font-medium mt-0.5">
                             {dateDisplay}
@@ -388,9 +391,9 @@ export function Sidebar({
         {/* SKILLS DISPLAY IN SIDEBAR */}
         {data['My Skills'] && (
           <div className="flex flex-col gap-1 text-white relative mt-6">
-            <div className="flex items-center gap-1.5 border-b border-white/10 pb-1">
-              <Star className="w-3 h-3 text-[#f1b700]" />
-              <h2 className="text-[0.75rem] font-bold tracking-widest uppercase whitespace-nowrap">Skills</h2>
+            <div className="flex items-center gap-1.5 border-b border-white/15 pb-1.5">
+              <Star className="w-3.5 h-3.5 text-[#f1b700]" />
+              <h2 className="text-[0.875rem] font-extrabold tracking-widest uppercase whitespace-nowrap text-[#f1b700]">Skills</h2>
             </div>
             <div className="relative pl-6 space-y-4 mt-4">
               {(() => {
@@ -435,10 +438,10 @@ export function Sidebar({
         {/* EDUCATION DISPLAY IN SIDEBAR */}
         {eduEntries.length > 0 && (
           <div className="flex flex-col gap-1 text-white relative mt-6" data-edu-section-marker="true">
-            <div className="flex items-center justify-between border-b border-white/10 pb-1">
+            <div className="flex items-center justify-between border-b border-white/15 pb-1.5">
               <div className="flex items-center gap-1.5">
-                <GraduationCap className="w-3.5 h-3.5" />
-                <h2 className="text-[0.75rem] font-bold tracking-widest uppercase whitespace-nowrap">Education Background</h2>
+                <GraduationCap className="w-4 h-4 text-[#f1b700]" />
+                <h2 className="text-[0.875rem] font-extrabold tracking-widest uppercase whitespace-nowrap text-[#f1b700]">Education Background</h2>
               </div>
             </div>
             
@@ -489,9 +492,9 @@ export function Sidebar({
         {/* PROJECT CONTRIBUTIONS DISPLAY IN SIDEBAR */}
         {(data['Project Contributions'] || data['Tools & Technologies']) && (
           <div className="flex flex-col gap-1 text-white relative mt-6 animate-in fade-in duration-200">
-            <div className="flex items-center gap-1.5 border-b border-white/10 pb-1">
-              <Code className="w-3.5 h-3.5 text-[#26c6da]" />
-              <h2 className="text-[0.75rem] font-bold tracking-widest uppercase whitespace-nowrap">Projects</h2>
+            <div className="flex items-center gap-1.5 border-b border-white/15 pb-1.5">
+              <Code className="w-4 h-4 text-[#f1b700]" />
+              <h2 className="text-[0.875rem] font-extrabold tracking-widest uppercase whitespace-nowrap text-[#f1b700]">Projects</h2>
             </div>
             <div className="relative pl-6 space-y-3 mt-4">
               {(() => {
@@ -574,9 +577,12 @@ export function Sidebar({
 
         {/* HOBBIES / INTERESTS */}
         {data['Interests'] && (
-          <div className="flex flex-col gap-1">
-            <h2 className="text-[0.75rem] font-bold tracking-widest border-b border-white/10 pb-0.5 uppercase text-white">Hobbies</h2>
-            <div className="text-[0.6875rem] text-gray-200 font-light leading-snug">
+          <div className="flex flex-col gap-1 text-white relative mt-6">
+            <div className="flex items-center gap-1.5 border-b border-white/15 pb-1.5">
+              <Heart className="w-3.5 h-3.5 text-[#f1b700]" />
+              <h2 className="text-[0.875rem] font-extrabold tracking-widest uppercase whitespace-nowrap text-[#f1b700]">Hobbies</h2>
+            </div>
+            <div className="text-[0.6875rem] text-gray-200 font-light leading-snug mt-4 pl-6">
               <FormattedText text={data['Interests']} />
             </div>
           </div>

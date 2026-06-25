@@ -100,7 +100,7 @@ const SortableJobItem: React.FC<SortableJobItemProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group/item relative w-full flex items-center min-h-[2.1rem] py-1 cursor-pointer transition-all pr-4 rounded-r-full ${
+      className={`group/item relative w-full flex items-center min-h-[2.5rem] py-2 pl-1 cursor-pointer transition-all pr-2 rounded-r-full ${
         activeJobId === job.id 
           ? 'bg-[#d3e3fd] text-[#041e49] font-bold' 
           : 'text-[#444746] hover:bg-[#e9eaeb]'
@@ -173,6 +173,13 @@ const SortableJobItem: React.FC<SortableJobItemProps> = ({
             </span>
             <div className="flex flex-col min-w-0 flex-1">
               <span className="truncate text-[13px] leading-tight pr-2">{job.title}</span>
+              {job.organization && (
+                <span className={`truncate text-[11px] leading-tight -mt-0.5 ${
+                  activeJobId === job.id ? 'text-blue-800/90 font-semibold' : 'text-blue-600/85 font-medium'
+                }`}>
+                  {job.organization}
+                </span>
+              )}
               <div className="truncate text-[10px] opacity-70 font-normal">
                 {(job.fromDate || job.toDate) && (
                   <>{formatDate(job.fromDate)} - {getToDateDisplay(job.toDate)}</>
